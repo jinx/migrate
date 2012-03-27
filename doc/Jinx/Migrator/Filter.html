@@ -1,0 +1,489 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta name="Content-Type" content="text/html; charset=utf-8" />
+<title>Class: Jinx::Migrator::Filter</title>
+<link rel="stylesheet" href="../../css/style.css" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="../../css/common.css" type="text/css" media="screen" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  relpath = '../..';
+  if (relpath != '') relpath += '/';
+</script>
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+    
+    <div id="header">
+      <div id="menu">
+  
+    <a href="../../_index.html">Index (F)</a> &raquo; 
+    <span class='title'><span class='object_link'><a href="../../Jinx.html" title="Jinx (module)">Jinx</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Migrator.html" title="Jinx::Migrator (class)">Migrator</a></span></span>
+     &raquo; 
+    <span class="title">Filter</span>
+  
+  
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  <a id="class_list_link" href="#">Class List</a>
+  <a id="method_list_link" href="#">Method List</a>
+  <a id ="file_list_link" href="#">File List</a>
+</div>
+
+      <div class="clear"></div>
+    </div>
+    
+    <iframe id="search_frame"></iframe>
+    
+    <div id="content"><h1>Class: Jinx::Migrator::Filter
+  
+  
+  
+</h1>
+
+<dl class="box">
+  
+    <dt class="r1">Inherits:</dt>
+    <dd class="r1">
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Jinx::Migrator::Filter</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+      </dd>
+    
+  
+  
+    
+  
+    
+  
+  
+  
+    <dt class="r2 last">Defined in:</dt>
+    <dd class="r2 last">lib/jinx/migration/filter.rb</dd>
+  
+</dl>
+<div class="clear"></div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>
+Transforms input values to a result based on a migration filter
+configuration. Each configuration entry is one of the following:
+</p>
+<pre class="code">
+  <span class='mult op'>*</span> <span class='literal identifier id'>literal</span><span class='colon op'>:</span> <span class='literal identifier id'>literal</span>
+  <span class='mult op'>*</span> <span class='regexp identifier id'>regexp</span><span class='colon op'>:</span> <span class='literal identifier id'>literal</span>
+  <span class='mult op'>*</span> <span class='regexp identifier id'>regexp</span><span class='colon op'>:</span> <span class='template identifier id'>template</span>
+</pre>
+<p>
+The regexp template can include match references (<tt>$1</tt>, <tt>$2</tt>, etc.)
+corresponding to the regexp captures. If the input value equals a literal,
+then the mapped literal is returned. Otherwise, if the input value matches
+a regexp, then the mapped transformation is returned after reference
+substitution. Otherwise, the input value is returned unchanged.
+</p>
+<p>
+For example, the config:
+</p>
+<pre class="code">
+  <span class='regexp val'>/(\d{1,2})\/x\/(\d{1,2})/</span> <span class='colon op'>:</span> <span class='$1 nth_ref id'>$1</span><span class='div op'>/</span><span class='integer val'>1</span><span class='div op'>/</span><span class='$2 nth_ref id'>$2</span>
+  <span class='n identifier id'>n</span><span class='div op'>/</span><span class='a identifier id'>a</span> <span class='colon op'>:</span> <span class='bitnot op'>~</span>
+</pre>
+<p>
+converts the input value as follows:
+</p>
+<pre class="code">
+  <span class='integer val'>3</span><span class='div op'>/</span><span class='integer val'>12</span><span class='div op'>/</span><span class='integer val'>02</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='integer val'>3</span><span class='div op'>/</span><span class='integer val'>12</span><span class='div op'>/</span><span class='integer val'>02</span> <span class='lparen token'>(</span><span class='no identifier id'>no</span> <span class='match identifier id'>match</span><span class='rparen token'>)</span>
+  <span class='integer val'>5</span><span class='div op'>/</span><span class='x identifier id'>x</span><span class='div op'>/</span><span class='integer val'>04</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='integer val'>5</span><span class='div op'>/</span><span class='integer val'>1</span><span class='div op'>/</span><span class='integer val'>04</span>
+  <span class='n identifier id'>n</span><span class='div op'>/</span><span class='a identifier id'>a</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='nil nil kw'>nil</span>
+</pre>
+<p>
+A catch-all <tt>/.*/</tt> regexp transforms any value which does not match another
+value or regexp, e.g.:
+</p>
+<pre class="code">
+  <span class='regexp val'>/^(\d+(\.\d*)?)( g(ram)?s?)?$/</span> <span class='colon op'>:</span> <span class='$1 nth_ref id'>$1</span> 
+  <span class='regexp val'>/.*/</span> <span class='colon op'>:</span> <span class='integer val'>0</span>
+</pre>
+<p>
+converts the input value as follows:
+</p>
+<pre class="code">
+  <span class='integer val'>3</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='integer val'>3</span>
+  <span class='float val'>4.3</span> <span class='grams identifier id'>grams</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='float val'>4.3</span>
+  <span class='unknown identifier id'>unknown</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='integer val'>0</span>
+</pre>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+</div>
+  <h2>Constant Summary</h2>
+  
+    <dl class="constants">
+      
+        <dt id="REGEXP_PAT-constant" class="">REGEXP_PAT =
+          <div class="docstring">
+  <div class="discussion">
+    <p>
+The pattern to match a regular expression with captures.
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+</div>
+        </dt>
+        <dd><pre class="code"><span class='regexp val'>/^\/(.*[^\\])\/([inx]+)?$/</span>
+</pre></dd>
+      
+    </dl>
+  
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#call-instance_method" title="#call (instance method)">- (Object) <strong>call</strong>(value) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>
+The transformed result.
+</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">- (Filter) <strong>initialize</strong>(spec) </a>
+    
+
+    
+  </span>
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>
+A new instance of Filter.
+</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <p class="signature first" id="initialize-instance_method">
+  
+    - (<tt><span class='object_link'><a href="" title="Jinx::Migrator::Filter (class)">Filter</a></span></tt>) <strong>initialize</strong>(spec) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>
+A new instance of Filter
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+        <span class='name'>spec</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the filter configuration specification.
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/jinx/migration/filter.rb', line 31</span>
+
+<span class='def def kw'>def</span> <span class='initialize identifier id'>initialize</span><span class='lparen token'>(</span><span class='spec identifier id'>spec</span><span class='rparen token'>)</span>
+  <span class='comment val'># Split the filter spec into a straight value =&gt; value hash and a pattern =&gt; value hash.</span>
+  <span class='ph identifier id'>ph</span><span class='comma token'>,</span> <span class='vh identifier id'>vh</span> <span class='assign token'>=</span> <span class='spec identifier id'>spec</span><span class='dot token'>.</span><span class='split identifier id'>split</span> <span class='lbrace token'>{</span> <span class='bitor op'>|</span><span class='k identifier id'>k</span><span class='comma token'>,</span> <span class='v identifier id'>v</span><span class='bitor op'>|</span> <span class='k identifier id'>k</span> <span class='match op'>=~</span> <span class='REGEXP_PAT constant id'>REGEXP_PAT</span> <span class='rbrace token'>}</span>
+  <span class='comment val'># The Regexp =&gt; value hash is built from the pattern =&gt; value hash.</span>
+  <span class='reh identifier id'>reh</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span>
+  <span class='comment val'># Make a matcher for each regexp pattern.</span>
+  <span class='ph identifier id'>ph</span><span class='dot token'>.</span><span class='each identifier id'>each</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='k identifier id'>k</span><span class='comma token'>,</span> <span class='v identifier id'>v</span><span class='bitor op'>|</span>
+    <span class='comment val'># The /pattern/opts string is parsed to the pattern and options.</span>
+    <span class='pat identifier id'>pat</span><span class='comma token'>,</span> <span class='opt identifier id'>opt</span> <span class='assign token'>=</span> <span class='REGEXP_PAT constant id'>REGEXP_PAT</span><span class='dot token'>.</span><span class='match identifier id'>match</span><span class='lparen token'>(</span><span class='k identifier id'>k</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='captures identifier id'>captures</span>
+    <span class='comment val'># the catch-all matcher</span>
+    <span class='if if kw'>if</span> <span class='pat identifier id'>pat</span> <span class='eq op'>==</span> <span class='string val'>'.*'</span> <span class='then then kw'>then</span>
+      <span class='@catch_all ivar id'>@catch_all</span> <span class='assign token'>=</span> <span class='v identifier id'>v</span>
+      <span class='next next kw'>next</span>
+    <span class='end end kw'>end</span>
+    <span class='comment val'># Convert the regexp i option character to a Regexp initializer parameter.</span>
+    <span class='reopt identifier id'>reopt</span> <span class='assign token'>=</span> <span class='if if kw'>if</span> <span class='opt identifier id'>opt</span> <span class='then then kw'>then</span>
+      <span class='case case kw'>case</span> <span class='opt identifier id'>opt</span>
+        <span class='when when kw'>when</span> <span class='string val'>'i'</span> <span class='then then kw'>then</span> <span class='Regexp constant id'>Regexp</span><span class='colon2 op'>::</span><span class='IGNORECASE constant id'>IGNORECASE</span>
+        <span class='else else kw'>else</span> <span class='Jinx constant id'>Jinx</span><span class='dot token'>.</span><span class='fail identifier id'>fail</span><span class='lparen token'>(</span><span class='MigrationError constant id'>MigrationError</span><span class='comma token'>,</span> <span class='dstring node'>&quot;Migration value filter regular expression #{k} qualifier not supported: expected 'i', found '#{opt}'&quot;</span><span class='rparen token'>)</span>
+      <span class='end end kw'>end</span>
+    <span class='end end kw'>end</span>
+    <span class='comment val'># the Regexp object</span>
+    <span class='re identifier id'>re</span> <span class='assign token'>=</span> <span class='Regexp constant id'>Regexp</span><span class='dot token'>.</span><span class='new identifier id'>new</span><span class='lparen token'>(</span><span class='pat identifier id'>pat</span><span class='comma token'>,</span> <span class='reopt identifier id'>reopt</span><span class='rparen token'>)</span>
+    <span class='comment val'># The regexp value can include match references ($1, $2, etc.). In that case, replace the $</span>
+    <span class='comment val'># match reference with a %s print reference, since the filter formats the matching input value.</span>
+    <span class='reh identifier id'>reh</span><span class='lbrack token'>[</span><span class='re identifier id'>re</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='String constant id'>String</span> <span class='eqq op'>===</span> <span class='v identifier id'>v</span> <span class='integer val'>? </span><span class='v identifier id'>v</span><span class='dot token'>.</span><span class='gsub identifier id'>gsub</span><span class='lparen token'>(</span><span class='regexp val'>/\$\d/</span><span class='comma token'>,</span> <span class='string val'>'%s'</span><span class='rparen token'>)</span> <span class='colon op'>:</span> <span class='v identifier id'>v</span>
+  <span class='end end kw'>end</span>
+  <span class='comment val'># The new proc matches preferentially on the literal value, then the first matching regexp.</span>
+  <span class='comment val'># If no match on either a literal or a regexp, then the value is preserved.</span>
+  <span class='@proc ivar id'>@proc</span> <span class='assign token'>=</span> <span class='Proc constant id'>Proc</span><span class='dot token'>.</span><span class='new identifier id'>new</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='value identifier id'>value</span><span class='bitor op'>|</span>
+    <span class='if if kw'>if</span> <span class='vh identifier id'>vh</span><span class='dot token'>.</span><span class='has_key? fid id'>has_key?</span><span class='lparen token'>(</span><span class='value identifier id'>value</span><span class='rparen token'>)</span> <span class='then then kw'>then</span>
+      <span class='vh identifier id'>vh</span><span class='lbrack token'>[</span><span class='value identifier id'>value</span><span class='rbrack token'>]</span>
+    <span class='else else kw'>else</span>
+      <span class='comment val'># The first regex which matches the value.</span>
+      <span class='regexp identifier id'>regexp</span> <span class='assign token'>=</span> <span class='reh identifier id'>reh</span><span class='dot token'>.</span><span class='detect_key identifier id'>detect_key</span> <span class='lbrace token'>{</span> <span class='bitor op'>|</span><span class='re identifier id'>re</span><span class='bitor op'>|</span> <span class='value identifier id'>value</span> <span class='match op'>=~</span> <span class='re identifier id'>re</span> <span class='rbrace token'>}</span>
+      <span class='comment val'># If there is a match, then apply the filter to the match data.</span>
+      <span class='comment val'># Otherwise, pass the value through unmodified.</span>
+      <span class='if if kw'>if</span> <span class='regexp identifier id'>regexp</span> <span class='then then kw'>then</span>
+        <span class='v identifier id'>v</span> <span class='assign token'>=</span> <span class='reh identifier id'>reh</span><span class='lbrack token'>[</span><span class='regexp identifier id'>regexp</span><span class='rbrack token'>]</span>
+        <span class='String constant id'>String</span> <span class='eqq op'>===</span> <span class='v identifier id'>v</span> <span class='integer val'>? </span><span class='v identifier id'>v</span> <span class='mod op'>%</span> <span class='$~ gvar id'>$~</span><span class='dot token'>.</span><span class='captures identifier id'>captures</span> <span class='colon op'>:</span> <span class='v identifier id'>v</span>
+      <span class='elsif elsif kw'>elsif</span> <span class='defined? defined kw'>defined?</span> <span class='@catch_all ivar id'>@catch_all</span> <span class='then then kw'>then</span>
+        <span class='@catch_all ivar id'>@catch_all</span>
+      <span class='else else kw'>else</span>
+        <span class='value identifier id'>value</span>
+      <span class='end end kw'>end</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+  
+  <span class='comment val'># @param [String] value the input string</span>
+  <span class='comment val'># @return the transformed result</span>
+  <span class='def def kw'>def</span> <span class='call identifier id'>call</span><span class='lparen token'>(</span><span class='value identifier id'>value</span><span class='rparen token'>)</span>
+    <span class='@proc ivar id'>@proc</span><span class='dot token'>.</span><span class='call identifier id'>call</span><span class='lparen token'>(</span><span class='value identifier id'>value</span><span class='rparen token'>)</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+    
+    
+      <div class="method_details first">
+  <p class="signature first" id="call-instance_method">
+  
+    - (<tt>Object</tt>) <strong>call</strong>(value) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>
+The transformed result
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+        <span class='name'>value</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the input string
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+<h3>Returns:</h3>
+<ul class="return">
+  
+    <li>
+      
+        <span class='type'></span>
+      
+      
+      
+      
+        
+        <div class='inline'><p>
+the transformed result
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+81
+82
+83</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/jinx/migration/filter.rb', line 81</span>
+
+<span class='def def kw'>def</span> <span class='call identifier id'>call</span><span class='lparen token'>(</span><span class='value identifier id'>value</span><span class='rparen token'>)</span>
+  <span class='@proc ivar id'>@proc</span><span class='dot token'>.</span><span class='call identifier id'>call</span><span class='lparen token'>(</span><span class='value identifier id'>value</span><span class='rparen token'>)</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+    
+    <div id="footer">
+  Generated on Thu Feb 16 18:54:03 2012 by 
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.6.1 (ruby-1.8.6).
+</div>
+
+  </body>
+</html>

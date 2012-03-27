@@ -1,0 +1,908 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta name="Content-Type" content="text/html; charset=utf-8" />
+<title>Class: Jinx::Migrator</title>
+<link rel="stylesheet" href="../css/style.css" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="../css/common.css" type="text/css" media="screen" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  relpath = '..';
+  if (relpath != '') relpath += '/';
+</script>
+<script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+    
+    <div id="header">
+      <div id="menu">
+  
+    <a href="../_index.html">Index (M)</a> &raquo; 
+    <span class='title'><span class='object_link'><a href="../Jinx.html" title="Jinx (module)">Jinx</a></span></span>
+     &raquo; 
+    <span class="title">Migrator</span>
+  
+  
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  <a id="class_list_link" href="#">Class List</a>
+  <a id="method_list_link" href="#">Method List</a>
+  <a id ="file_list_link" href="#">File List</a>
+</div>
+
+      <div class="clear"></div>
+    </div>
+    
+    <iframe id="search_frame"></iframe>
+    
+    <div id="content"><h1>Class: Jinx::Migrator
+  
+  
+  
+</h1>
+
+<dl class="box">
+  
+    <dt class="r1">Inherits:</dt>
+    <dd class="r1">
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Jinx::Migrator</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+      </dd>
+    
+  
+  
+    
+  
+    
+      <dt class="r2">Includes:</dt>
+      <dd class="r2">Enumerable</dd>
+      
+    
+  
+  
+  
+    <dt class="r1 last">Defined in:</dt>
+    <dd class="r1 last">lib/jinx/migration/migrator.rb<span class="defines">,<br />
+  lib/jinx/migration/filter.rb</span>
+</dd>
+  
+</dl>
+<div class="clear"></div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>
+Migrates a CSV extract to a caBIG application.
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+</div><h2>Defined Under Namespace</h2>
+<p class="children">
+   
+    
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Migrator/Reader.html" title="Jinx::Migrator::Reader (module)">Reader</a></span>
+    
+   
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Migrator/Filter.html" title="Jinx::Migrator::Filter (class)">Filter</a></span>
+    
+  
+</p>
+
+
+  
+
+  
+    <h2>
+      Instance Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#each-instance_method" title="#each (instance method)">- (Object) <strong>each</strong> {|target| ... }</a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">- (Migrator) <strong>initialize</strong>(opts) </a>
+    
+
+    
+  </span>
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>
+Creates a new Migrator.
+</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#migrate-instance_method" title="#migrate (instance method)">- (Object) <strong>migrate</strong> {|target, row| ... }</a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>
+Imports this migrator&#8217;s CSV file and calls the given block on each
+migrated target domain object.
+</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#migrate_to_database-instance_method" title="#migrate_to_database (instance method)">- (Object) <strong>migrate_to_database</strong> {|target, row| ... }</a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>
+Imports this migrator&#8217;s file into the database with the given connect
+options.
+</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <p class="signature first" id="initialize-instance_method">
+  
+    - (<tt><span class='object_link'><a href="" title="Jinx::Migrator (class)">Migrator</a></span></tt>) <strong>initialize</strong>(opts) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>
+Creates a new Migrator. The input can be either a file name or a source
+factory. The factory implements the <tt>open</tt> method, which returns a
+<span class='object_link'><a href="Migrator/Reader.html" title="Jinx::Migrator::Reader (module)">Reader</a></span>
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>{Symbol =&gt; Object}</tt>)</span>
+      
+      
+        <span class='name'>opts</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the migration options
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+  
+    
+    
+    <h3>Options Hash (<tt>opts</tt>):</h3>
+    <ul class="option">
+      
+        <li>
+          <span class="type">(<tt>String</tt>)</span>
+          <span class="name">:target</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the required target domain class
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>&lt;String&gt;</tt>, <tt>String</tt>)</span>
+          <span class="name">:mapping</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the required input field => caTissue attribute mapping file(s)
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>String</tt>, <tt><span class='object_link'><a href="Migrator/Reader.html" title="Jinx::Migrator::Reader (module)">Reader</a></span></tt>)</span>
+          <span class="name">:input</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the required input file name or an adapter which implements the <span class='object_link'><a href="Migrator/Reader.html" title="Jinx::Migrator::Reader (module)">Reader</a></span>
+methods
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>Jinx::Database</tt>)</span>
+          <span class="name">:database</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional destination <tt>Jinx::Database</tt>
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>&lt;String&gt;</tt>, <tt>String</tt>)</span>
+          <span class="name">:defaults</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional caTissue attribute => value default mapping file(s)
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>&lt;String&gt;</tt>, <tt>String</tt>)</span>
+          <span class="name">:filters</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional caTissue attribute input value => caTissue value filter
+file(s)
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>&lt;String&gt;</tt>, <tt>String</tt>)</span>
+          <span class="name">:shims</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional shim file(s) to load
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>String</tt>)</span>
+          <span class="name">:unique</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional flag which ensures that migrator calls the <tt>uniquify</tt>
+method on those migrated objects whose class includes the <tt>Unique</tt>
+module
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>String</tt>)</span>
+          <span class="name">:create</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional flag indicating that existing target objects are ignored
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>String</tt>)</span>
+          <span class="name">:bad</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional invalid record file
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>String</tt>, <tt>IO</tt>)</span>
+          <span class="name">:extract</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional extract file or object that responds to <tt>&lt;&lt;</tt>
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>&lt;String&gt;</tt>)</span>
+          <span class="name">:extract_headers</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional extract CSV field headers
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>Integer</tt>)</span>
+          <span class="name">:from</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional starting source record number to process
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>Integer</tt>)</span>
+          <span class="name">:to</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional ending source record number to process
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>Boolean</tt>)</span>
+          <span class="name">:quiet</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional flag which suppress output messages
+</p>
+</div>
+        </tr>
+      
+        <li>
+          <span class="type">(<tt>Boolean</tt>)</span>
+          <span class="name">:verbose</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>
+the optional flag to print the migration progress
+</p>
+</div>
+        </tr>
+      
+    </ul>
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+55
+56
+57
+58
+59
+60</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/jinx/migration/migrator.rb', line 55</span>
+
+<span class='def def kw'>def</span> <span class='initialize identifier id'>initialize</span><span class='lparen token'>(</span><span class='opts identifier id'>opts</span><span class='rparen token'>)</span>
+  <span class='@rec_cnt ivar id'>@rec_cnt</span> <span class='assign token'>=</span> <span class='integer val'>0</span>
+  <span class='@mgt_mths ivar id'>@mgt_mths</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span>
+  <span class='parse_options identifier id'>parse_options</span><span class='lparen token'>(</span><span class='opts identifier id'>opts</span><span class='rparen token'>)</span>
+  <span class='build identifier id'>build</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+    
+    
+      <div class="method_details first">
+  <p class="signature first" id="each-instance_method">
+  
+    - (<tt>Object</tt>) <strong>each</strong> {|target| ... }
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Yields:</h3>
+<ul class="yield">
+  
+    <li>
+      
+        <span class='type'>(<tt>target</tt>)</span>
+      
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+iterate on each migration target
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+<h3>Yield Parameters:</h3>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='type'>(<tt>Jinx::Resource</tt>)</span>
+      
+      
+        <span class='name'>the</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+migration target
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+128
+129
+130</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/jinx/migration/migrator.rb', line 128</span>
+
+<span class='def def kw'>def</span> <span class='each identifier id'>each</span>
+  <span class='migrate identifier id'>migrate</span> <span class='lbrace token'>{</span> <span class='bitor op'>|</span><span class='tgt identifier id'>tgt</span><span class='comma token'>,</span> <span class='row identifier id'>row</span><span class='bitor op'>|</span> <span class='yield yield kw'>yield</span> <span class='tgt identifier id'>tgt</span> <span class='rbrace token'>}</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="migrate-instance_method">
+  
+    - (<tt>Object</tt>) <strong>migrate</strong> {|target, row| ... }
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>
+Imports this migrator&#8217;s CSV file and calls the given block on each
+migrated target domain object. If no block is given, then this method
+returns an array of the migrated target objects.
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Yields:</h3>
+<ul class="yield">
+  
+    <li>
+      
+        <span class='type'>(<tt>target</tt>, <tt>row</tt>)</span>
+      
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+operation performed on the migration target
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+<h3>Yield Parameters:</h3>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='type'>(<tt>Jinx::Resource</tt>)</span>
+      
+      
+        <span class='name'>target</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the migrated target domain object
+</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='type'>(<tt>{Symbol =&gt; Object}</tt>)</span>
+      
+      
+        <span class='name'>row</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the migration source record
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/jinx/migration/migrator.rb', line 86</span>
+
+<span class='def def kw'>def</span> <span class='migrate identifier id'>migrate</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='unless unless kw'>unless</span> <span class='block_given? fid id'>block_given?</span> <span class='then then kw'>then</span>
+    <span class='return return kw'>return</span> <span class='migrate identifier id'>migrate</span> <span class='lbrace token'>{</span> <span class='bitor op'>|</span><span class='tgt identifier id'>tgt</span><span class='comma token'>,</span> <span class='row identifier id'>row</span><span class='bitor op'>|</span> <span class='tgt identifier id'>tgt</span> <span class='rbrace token'>}</span>
+  <span class='end end kw'>end</span>
+  <span class='comment val'># If there is an extract, then wrap the migration in an extract</span>
+  <span class='comment val'># writer block.</span>
+  <span class='if if kw'>if</span> <span class='@extract ivar id'>@extract</span> <span class='then then kw'>then</span>
+    <span class='if if kw'>if</span> <span class='String constant id'>String</span> <span class='eqq op'>===</span> <span class='@extract ivar id'>@extract</span> <span class='then then kw'>then</span>
+      <span class='logger identifier id'>logger</span><span class='dot token'>.</span><span class='debug identifier id'>debug</span> <span class='lbrace token'>{</span> <span class='dstring node'>&quot;Opening migration extract #{@extract}...&quot;</span> <span class='rbrace token'>}</span>
+      <span class='FileUtils constant id'>FileUtils</span><span class='colon2 op'>::</span><span class='mkdir_p identifier id'>mkdir_p</span><span class='lparen token'>(</span><span class='File constant id'>File</span><span class='dot token'>.</span><span class='dirname identifier id'>dirname</span><span class='lparen token'>(</span><span class='@extract ivar id'>@extract</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+      <span class='if if kw'>if</span> <span class='@extract_hdrs ivar id'>@extract_hdrs</span> <span class='then then kw'>then</span>
+        <span class='logger identifier id'>logger</span><span class='dot token'>.</span><span class='debug identifier id'>debug</span> <span class='lbrace token'>{</span> <span class='dstring node'>&quot;Migration extract headers: #{@extract_hdrs.join(', ')}.&quot;</span> <span class='rbrace token'>}</span>
+        <span class='CsvIO constant id'>CsvIO</span><span class='dot token'>.</span><span class='open identifier id'>open</span><span class='lparen token'>(</span><span class='@extract ivar id'>@extract</span><span class='comma token'>,</span> <span class='symbol val'>:mode</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'w'</span><span class='comma token'>,</span> <span class='symbol val'>:headers</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='@extract_hdrs ivar id'>@extract_hdrs</span><span class='rparen token'>)</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='io identifier id'>io</span><span class='bitor op'>|</span>
+          <span class='@extract ivar id'>@extract</span> <span class='assign token'>=</span> <span class='io identifier id'>io</span>
+          <span class='return return kw'>return</span> <span class='migrate identifier id'>migrate</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+        <span class='end end kw'>end</span>
+      <span class='else else kw'>else</span>
+        <span class='File constant id'>File</span><span class='dot token'>.</span><span class='open identifier id'>open</span><span class='lparen token'>(</span><span class='@extract ivar id'>@extract</span><span class='comma token'>,</span> <span class='string val'>'w'</span><span class='rparen token'>)</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='io identifier id'>io</span><span class='bitor op'>|</span>
+          <span class='@extract ivar id'>@extract</span> <span class='assign token'>=</span> <span class='io identifier id'>io</span>
+          <span class='return return kw'>return</span> <span class='migrate identifier id'>migrate</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+        <span class='end end kw'>end</span>
+      <span class='end end kw'>end</span>
+    <span class='end end kw'>end</span>
+    <span class='comment val'># Copy the extract into a local variable and clear the extract i.v.</span>
+    <span class='comment val'># prior to a recursive call with an extract writer block.</span>
+    <span class='io identifier id'>io</span><span class='comma token'>,</span> <span class='@extract ivar id'>@extract</span> <span class='assign token'>=</span> <span class='@extract ivar id'>@extract</span><span class='comma token'>,</span> <span class='nil nil kw'>nil</span>
+    <span class='return return kw'>return</span> <span class='migrate identifier id'>migrate</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='tgt identifier id'>tgt</span><span class='comma token'>,</span> <span class='row identifier id'>row</span><span class='bitor op'>|</span>
+      <span class='res identifier id'>res</span> <span class='assign token'>=</span> <span class='yield yield kw'>yield</span><span class='lparen token'>(</span><span class='tgt identifier id'>tgt</span><span class='comma token'>,</span> <span class='row identifier id'>row</span><span class='rparen token'>)</span>
+      <span class='tgt identifier id'>tgt</span><span class='dot token'>.</span><span class='extract identifier id'>extract</span><span class='lparen token'>(</span><span class='io identifier id'>io</span><span class='rparen token'>)</span>
+      <span class='res identifier id'>res</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+  <span class='begin begin kw'>begin</span>
+    <span class='migrate_rows identifier id'>migrate_rows</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='ensure ensure kw'>ensure</span>
+    <span class='@rejects ivar id'>@rejects</span><span class='dot token'>.</span><span class='close identifier id'>close</span> <span class='if if_mod kw'>if</span> <span class='@rejects ivar id'>@rejects</span>
+    <span class='remove_migration_methods identifier id'>remove_migration_methods</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="migrate_to_database-instance_method">
+  
+    - (<tt>Object</tt>) <strong>migrate_to_database</strong> {|target, row| ... }
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>
+Imports this migrator&#8217;s file into the database with the given connect
+options. This method creates or updates the domain objects mapped from the
+import source. If a block is given to this method, then the block is called
+on each stored migration target object.
+</p>
+<p>
+If the <tt>:create</tt> option is set, then an input record for a target
+object which already exists in the database is noted in a debug log message
+and ignored rather than updated.
+</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Yields:</h3>
+<ul class="yield">
+  
+    <li>
+      
+        <span class='type'>(<tt>target</tt>, <tt>row</tt>)</span>
+      
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+operation performed on the migration target
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+<h3>Yield Parameters:</h3>
+<ul class="yieldparam">
+  
+    <li>
+      
+        <span class='type'>(<tt>Jinx::Resource</tt>)</span>
+      
+      
+        <span class='name'>target</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the migrated target domain object
+</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='type'>(<tt>{Symbol =&gt; Object}</tt>)</span>
+      
+      
+        <span class='name'>row</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>
+the migration source record
+</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+73
+74
+75
+76
+77</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/jinx/migration/migrator.rb', line 73</span>
+
+<span class='def def kw'>def</span> <span class='migrate_to_database identifier id'>migrate_to_database</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='comment val'># migrate with save</span>
+  <span class='tm identifier id'>tm</span> <span class='assign token'>=</span> <span class='Stopwatch constant id'>Stopwatch</span><span class='dot token'>.</span><span class='measure identifier id'>measure</span> <span class='lbrace token'>{</span> <span class='execute_save identifier id'>execute_save</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='rbrace token'>}</span><span class='dot token'>.</span><span class='elapsed identifier id'>elapsed</span>
+  <span class='logger identifier id'>logger</span><span class='dot token'>.</span><span class='debug identifier id'>debug</span> <span class='lbrace token'>{</span> <span class='format_migration_time_log_message identifier id'>format_migration_time_log_message</span><span class='lparen token'>(</span><span class='tm identifier id'>tm</span><span class='rparen token'>)</span> <span class='rbrace token'>}</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+    
+    <div id="footer">
+  Generated on Thu Feb 16 18:54:03 2012 by 
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.6.1 (ruby-1.8.6).
+</div>
+
+  </body>
+</html>

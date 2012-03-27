@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+#
+# csvjoin: joins two CSV files on their common fields
+#
+
+# Add the migrate lib to the path.
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'rubygems'
+require 'jinx'
+require 'jinx/csv/csvio'
+require 'jinx/cli/command'
+
+specs = [
+  [:source, 'SOURCE', 'The source input file'],
+  [:target, '[TARGET]', 'The target input file (default stdin)'],
+  [:output, '-o' '--output FILE', 'The joined output file (default stdout)']
+]
+
+Jinx::CLI::Command.new(specs).start do |opts|
+  Jinx::CsvIO.join(opts[:source], opts[:target], opts[:output])
+end
+
+exit 0

@@ -1,0 +1,4 @@
+# This value filter configuration file demonstrates how to transform an input field value
+# to a migrated value. 'Street' is abbreviated to 'St'.
+Address.street1:
+  /^(.*) Street(.*)/ : "$1 St$2"
