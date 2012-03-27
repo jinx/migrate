@@ -25,7 +25,7 @@ Usage
 
 3. Run the migrator.
 
-See the [Family](http://github.com/jinx/migrate/examples/family) example for a sample migration.
+See the [Family](http://github.com/jinx/migrate/tree/master/examples/family) example for a sample migration.
 
 Copyright
 ---------
