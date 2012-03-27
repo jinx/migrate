@@ -62,7 +62,7 @@ module Jinx
     # @param [String, IO] target the join target
     # @param [String, IO, nil] output the output file name or device (default stdout)
     def self.join(source, target=nil, output=nil)
-      Joiner.new(source, target, output).join
+      Csv::Joiner.new(source, target, output).join
     end
     
     # Creates a new CsvIO for the specified source file.
