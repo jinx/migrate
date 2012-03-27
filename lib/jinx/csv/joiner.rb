@@ -1,5 +1,5 @@
 module Jinx
-  class CsvIO
+  module Csv
     # Merges two CSV files on common fields.
     class Joiner
       include Enumerable
