@@ -9,7 +9,7 @@ Jinx Migrator
 
 Synopsis
 --------
-Jinx JSON enables JSON serialization for [Jinx]((http://github.com/jinx/core) resources.
+Jinx JSON enables JSON serialization for [Jinx](http://github.com/jinx/core) resources.
 
 Installing
 ----------
@@ -19,7 +19,7 @@ Jinx JSON is installed as a JRuby gem:
 
 Usage
 -----
-Enable Jinx for a Java package, as described in the [Jinx]((http://github.com/jinx/core) Usage.
+Enable Jinx for a Java package, as described in the [Jinx](http://github.com/jinx/core) Usage.
 
     require 'jinx/migrate'
     migrateed = jinxed.to_migrate #=> the JSON representation of a jinxed resource
