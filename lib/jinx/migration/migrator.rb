@@ -4,11 +4,13 @@ require 'jinx/helpers/boolean'
 require 'jinx/helpers/class'
 require 'jinx/helpers/collections'
 require 'jinx/helpers/lazy_hash'
+require 'jinx/helpers/log'
 require 'jinx/helpers/inflector'
 require 'jinx/helpers/pretty_print'
 require 'jinx/helpers/stopwatch'
 require 'jinx/helpers/transitive_closure'
 require 'jinx/migration/migratable'
+require 'jinx/migration/reader'
 require 'jinx/migration/filter'
 
 module Jinx
@@ -17,27 +19,15 @@ module Jinx
   # Migrates a CSV extract to a caBIG application.
   class Migrator
     include Enumerable
-    
-    # A prototypical source reader which enumerates the input records.
-    module Reader
-      include Enumerable
-      
-      # @param [String] name the migration mapping source field name, e.g. +First Name+
-      # @return [Symbol] the record value accessor symbol, e.g. +:first_name+
-      def accessor(name); end
-      
-      # @yield [rec] migrate the source record
-      # @yieldparam [{Symbol => Object}] rec the source accessor => value record
-      def each; end
-    end
 
     # Creates a new Migrator. The input can be either a file name or a source factory. The factory
-    # implements the +open+ method, which returns a {Reader}
+    # implements the +open+ method, which returns a {Migration::Reader}
     #
     # @param [{Symbol => Object}] opts the migration options
     # @option opts [String] :target the required target domain class
     # @option opts [<String>, String] :mapping the required input field => caTissue attribute mapping file(s)
-    # @option opts [String, Reader] :input the required input file name or an adapter which implements the {Reader} methods
+    # @option opts [String, Migration::Reader] :input the required input file name or an adapter which
+    #   implements the {Migration::Reader} methods
     # @option opts [Jinx::Database] :database the optional destination +Jinx::Database+
     # @option opts [<String>, String] :defaults the optional caTissue attribute => value default mapping file(s)
     # @option opts [<String>, String] :filters the optional caTissue attribute input value => caTissue value filter file(s)
@@ -172,9 +162,9 @@ module Jinx
           # Ensure that each migrated object is created if necessary.
           @migrated.each do |obj|
             next if obj.identifier
-            logger.debug { "Migrator saving the migrated #{obj}..." }
+            logger.debug { "The migrator is saving the migrated #{obj}..." }
             save(obj, db)
-            logger.debug { "Migrator saved the migrated #{obj}." }
+            logger.debug { "The migrator saved the migrated #{obj}." }
           end
           yield(tgt, rec) if block_given?
           db.clear
@@ -283,12 +273,12 @@ module Jinx
       @nonstring_headers = Set.new
       logger.info("Migration attributes:")
       @header_map.each do |path, cls_hdr_hash|
-        pa = path.last
+        prop = path.last
         cls_hdr_hash.each do |klass, hdr|
-          type_s = pa.type ? pa.type.qp : 'Object'
+          type_s = prop.type ? prop.type.qp : 'Object'
           logger.info("  #{hdr} => #{klass.qp}.#{path.join('.')} (#{type_s})")
         end
-        @nonstring_headers.merge!(cls_hdr_hash.values) if pa.type != Java::JavaLang::String
+        @nonstring_headers.merge!(cls_hdr_hash.values) if prop.type != Java::JavaLang::String
       end
     end
    
@@ -318,7 +308,7 @@ module Jinx
     # @yield the map entry for a new owner
     def add_owners_for(klass, hash, &factory)
       owner = missing_owner_for(klass, hash) || return
-      logger.debug { "Migrator adding #{klass.qp} owner #{owner}" }
+      logger.debug { "The migrator is adding #{klass.qp} owner #{owner}..." }
       @owners << owner
       hash[owner] = yield
       add_owners_for(owner, hash, &factory)
@@ -363,10 +353,10 @@ module Jinx
       # add each path terminal attribute and its declarer class
       @cls_paths_hash.each_value do |paths|
         paths.each do |path|
-          pa = path.last
-          type = pa.declarer
+          prop = path.last
+          type = prop.declarer
           klasses << type
-          cls_attrs_hash[type] << pa
+          cls_attrs_hash[type] << prop
         end
       end
       
@@ -445,36 +435,56 @@ module Jinx
     
     # Builds the property => filter hash. The filter is specified in the +--filter+ migration
     # option. A Boolean property has a default String => Boolean filter which converts the
-    # input string to a Boolean as specified in the +Jinx::Boolean+ +to_boolean+ monkeypatch
-    # methods.
+    # input string to a Boolean as specified in the +Jinx::Boolean+ +to_boolean+ methods.
     #
+    # @param [Class] klass the migration class
     # @return [Property => Proc] the filter migration methods
     def attribute_proc_hash(klass)
       hash = @filter_hash[klass]
       proc_hash = {}
       klass.each_property do |prop|
         pa = prop.attribute
-        flt = hash[pa] if hash
-        if flt then
-          proc_hash[pa] = Filter.new(flt)
-        elsif prop.type == Java::JavaLang::Boolean then
-          proc_hash[pa] = Proc.new { |value| value.to_boolean } 
+        spec = hash[pa] if hash
+        # If the property is boolean, then make a filter that operates on the parsed string input.
+        if prop.type == Java::JavaLang::Boolean then
+          boolean_filter(spec)
+        elsif spec then
+          proc_hash[pa] = Migration::Filter.new(spec)
         end
       end
       unless proc_hash.empty? then
-        logger.debug { "Migration filters loaded for #{klass.qp} #{proc_hash.keys.to_series}." }
+        logger.debug { "The migration filters were loaded for #{klass.qp} #{proc_hash.keys.to_series}." }
       end
       proc_hash
+    end
+                    
+    # @param [String, nil] the value filter, if any
+    # @return [Migration::Filter] the boolean property migration filter
+    def boolean_filter(spec=nil)
+      # break up the spec into two specs, one on strings and one on booleans
+      bspec, sspec = spec.split { |k, v| Boolean === k } if spec
+      bf = Migration::Filter.new(bspec) unless bspec.empty?
+      sf = Migration::Filter.new(sspec) unless sspec.empty?
+      logger.debug { "The migrator added the default text -> boolean filter for #{klass.qp} #{pa}." }
+      # make the composite filter 
+      Migration::Filter.new do |value|
+        fv = sf.filter(value) if sf
+        if fv.nil? then
+          bv = Jinx::Boolean.for(value) rescue nil
+          fv = bf.nil? || bv.nil? ? bv : bf.filter(bv)
+        end
+        fv
+      end 
     end
 
     # Loads the shim files.
     #
     # @param [<String>, String] files the file or file array
     def load_shims(files)
-      logger.debug { "Loading shims with load path #{$:.pp_s}..." }
+      logger.debug { "Loading the migration shims with load path #{$:.pp_s}..." }
       files.enumerate do |file|
         load file
-        logger.info { "Migrator loaded shim file #{file}." }
+        logger.info { "The migrator loaded the shim file #{file}." }
       end
     end
 
@@ -510,7 +520,7 @@ module Jinx
           tgt = migrate_row(row)
           # call the block on the migrated target
           if tgt then
-            logger.debug { "Migrator built #{tgt} with the following content:\n#{tgt.dump}" }
+            logger.debug { "The migrator built #{tgt} with the following content:\n#{tgt.dump}" }
             yield(tgt, row)
           end
         rescue Exception => e
@@ -592,7 +602,7 @@ module Jinx
       migrated.each do |obj|
         # First uniquify the object if necessary.
         if @unique and Unique === obj then
-          logger.debug { "Migrator making #{obj} unique..." }
+          logger.debug { "The migrator is making #{obj} unique..." }
           obj.uniquify
         end
         obj.migrate(row, migrated)
@@ -635,7 +645,7 @@ module Jinx
       valid.reverse.each do |obj|
         unless owner_valid?(obj, valid, invalid) then
           invalid << valid.delete(obj)
-          logger.debug { "Invalidated migrated #{obj} since it does not have a valid owner." }
+          logger.debug { "The migrator invalidated #{obj} since it does not have a valid owner." }
         end
       end
       
@@ -644,9 +654,9 @@ module Jinx
       valid.reject do |obj|
         if @owners.include?(obj.class) and obj.dependents.all? { |dep| invalid.include?(dep) } then
           # clear all references from the invalidated owner
-          obj.class.domain_attributes.each_property { |pa| obj.clear_attribute(pa.to_sym) }
+          obj.class.domain_attributes.each { |pa| obj.clear_attribute(pa) }
           invalid << obj
-          logger.debug { "Invalidated #{obj.qp} since it was created solely to hold subsequently invalidated dependents." }
+          logger.debug { "The migrator invalidated #{obj.qp} since it was created solely to hold subsequently invalidated dependents." }
           true
         end
       end
@@ -672,7 +682,7 @@ module Jinx
       if obj.migration_valid? then
         true
       else
-        logger.debug { "Migrated #{obj.qp} is invalid." }
+        logger.debug { "The migrated #{obj.qp} is invalid." }
         false
       end
     end
@@ -687,11 +697,11 @@ module Jinx
     # @return [Resource] the new instance
     def create(klass, row, created)
       # the new object
-      logger.debug { "Migrator building #{klass.qp}..." }
+      logger.debug { "The migrator is building #{klass.qp}..." }
       created << obj = klass.new
-      migrate_attributes(obj, row, created)
+      migrate_properties(obj, row, created)
       add_defaults(obj, row, created)
-      logger.debug { "Migrator built #{obj}." }
+      logger.debug { "The migrator built #{obj}." }
       obj
     end
     
@@ -701,7 +711,7 @@ module Jinx
     # @param [Resource] the migration object
     # @param row (see #create)
     # @param [<Resource>] created (see #create)
-    def migrate_attributes(obj, row, created)
+    def migrate_properties(obj, row, created)
       # for each input header which maps to a migratable target attribute metadata path,
       # set the target attribute, creating intermediate objects as needed.
       @cls_paths_hash[obj.class].each do |path|
@@ -713,7 +723,7 @@ module Jinx
         # fill the reference path
         ref = fill_path(obj, path[0...-1], row, created)
         # set the attribute
-        migrate_attribute(ref, path.last, value, row)
+        migrate_property(ref, path.last, value, row)
       end
     end
     
@@ -737,63 +747,65 @@ module Jinx
     # @return the last domain object in the path
     def fill_path(obj, path, row, created)
       # create the intermediate objects as needed (or return obj if path is empty)
-      path.inject(obj) do |parent, pa|
+      path.inject(obj) do |parent, prop|
         # the referenced object
-        parent.send(pa.reader) or create_reference(parent, pa, row, created)
+        parent.send(prop.reader) or create_reference(parent, prop, row, created)
       end
     end
 
     # Sets the given migrated object's reference attribute to a new referenced domain object.
     #
     # @param [Resource] obj the domain object being migrated
-    # @param [Property] pa the attribute being migrated
+    # @param [Property] property the property being migrated
     # @param row (see #create)
     # @param created (see #create)
     # @return the new object
-    def create_reference(obj, pa, row, created)
-      if pa.type.abstract? then
-        Jinx.fail(MigrationError, "Cannot create #{obj.qp} #{pa} with abstract type #{pa.type}")
+    def create_reference(obj, property, row, created)
+      if property.type.abstract? then
+        Jinx.fail(MigrationError, "Cannot create #{obj.qp} #{property} with abstract type #{property.type}")
       end
-      ref = pa.type.new
+      ref = property.type.new
       ref.migrate(row, Array::EMPTY_ARRAY)
-      obj.send(pa.writer, ref)
+      obj.send(property.writer, ref)
       created << ref
-      logger.debug { "Migrator created #{obj.qp} #{pa} #{ref}." }
+      logger.debug { "The migrator created #{obj.qp} #{property} #{ref}." }
       ref
     end
 
-    # Sets the given attribute value to the filtered input value. If there is a filter
-    # defined for the attribute, then that filter is applied. If there is a migration
-    # shim method with name +migrate_+_attribute_, then than method is called on the
-    # (possibly filtered) value. The target object attribute is set to the resulting
+    # Sets the given property value to the filtered input value. If there is a filter
+    # defined for the property, then that filter is applied. If there is a migration
+    # shim method with name +migrate_+_attribute_, then that method is called on the
+    # (possibly filtered) value. The target object property is set to the resulting
     # filtered value. 
     #
     # @param [Migratable] obj the target domain object
-    # @param [Property] pa the target attribute
+    # @param [Property] property the property to set
     # @param value the input value
     # @param [{Symbol => Object}] row the input row
-    def migrate_attribute(obj, pa, value, row)
+    def migrate_property(obj, property, value, row)
       # if there is a shim migrate_<attribute> method, then call it on the input value
-      value = filter_value(obj, pa, value, row) || return
+      value = filter_value(obj, property, value, row)
+      return if value.nil?
       # set the attribute
       begin
-        obj.send(pa.writer, value)
+        obj.send(property.writer, value)
       rescue Exception => e
-        Jinx.fail(MigrationError, "Could not set #{obj.qp} #{pa} to #{value.qp}", e)
+        Jinx.fail(MigrationError, "Could not set #{obj.qp} #{property} to #{value.qp}", e)
       end
-      logger.debug { "Migrated #{obj.qp} #{pa} to #{value}." }
+      logger.debug { "Migrated #{obj.qp} #{property} to #{value}." }
     end
     
     # Calls the shim migrate_<attribute> method or config filter on the input value.
     #
     # @param value the input value
+    # @param [Property] property the property to set
     # @return the input value, if there is no filter, otherwise the filtered value
-    def filter_value(obj, pa, value, row)
-      filter = filter_for(obj, pa.to_sym)
-      return value if filter.nil?
-      fval = filter.call(obj, value, row)
+    def filter_value(obj, property, value, row)
+      flt = filter_for(obj, property.to_sym)
+      return value if flt.nil?
+      fval = flt.filter(obj, value, row)
       unless value == fval then
-        logger.debug { "Migration filter transformed #{obj.qp} #{pa} value from #{value.qp} to #{fval}." }
+        logger.debug { "The migration filter transformed the #{obj.qp} #{property} value from #{value.qp} to #{fval}." }
       end
       fval
     end
@@ -930,6 +942,7 @@ module Jinx
       # collect the class => path => value entries from each defaults file
       hash = {}
       files.enumerate { |file| load_filter_file(file, hash) }
+      logger.debug { "The migrator loaded the filters #{hash.qp}." }
       hash
     end
     
@@ -939,7 +952,7 @@ module Jinx
     # @param [<Class => <String => <Object => Object>>>] hash the class => path => input value => caTissue value entries 
     def load_filter_file(file, hash)
       # collect the class => attribute => filter entries
-      logger.debug { "Loading filter configuration #{file}..." }
+      logger.debug { "Loading the migration filter configuration #{file}..." }
       begin
         config = YAML::load_file(file)
       rescue
