@@ -1,4 +1,10 @@
 PATH
+  remote: /Users/loneyf/workspace/jinx/core
+  specs:
+    jinx (2.1.1)
+      bundler
+
+PATH
   remote: .
   specs:
     jinx-migrate (2.1.1)
@@ -18,6 +24,7 @@ PLATFORMS
   java
 
 DEPENDENCIES
+  jinx!
   jinx-migrate!
   rake
   rspec (~> 1.3.2)
