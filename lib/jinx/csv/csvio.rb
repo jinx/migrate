@@ -58,11 +58,15 @@ module Jinx
     # empty values for the merged fields. Both files must be sorted in order of the
     # common fields, sequenced by their occurence in the source header.
     #
-    # @param [String, IO] source the join source
-    # @param [String, IO] target the join target
-    # @param [String, IO, nil] output the output file name or device (default stdout)
-    def self.join(source, target=nil, output=nil)
-      Csv::Joiner.new(source, target, output).join
+    # @param [String, IO] source the join source file
+    # @param [{Symbol => String, IO, <String>}] opts the join options
+    # @option opts [String, IO] :to the join target file name or device (default stdin)
+    # @option opts [String, IO] :for the target field names (default all target fields)
+    # @option opts [String, IO] :as the output file name or device (default stdout)
+    # @yield (see Csv::Joiner#join)
+    # @yieldparam (see Csv::Joiner#join)
+    def self.join(source, opts, &block)
+      Csv::Joiner.new(source, opts[:to], opts[:as]).join(*opts[:for], &block)
     end
     
     # Creates a new CsvIO for the specified source file.

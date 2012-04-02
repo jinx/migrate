@@ -1,3 +1,5 @@
+require 'set'
+
 module Jinx
   module Csv
     # Merges two CSV files on common fields.
@@ -13,22 +15,44 @@ module Jinx
         @output = output || STDOUT
       end
   
-      # Joins the source to the target and writes the output. The match is on all fields
-      # held in common. If there is more than one match, then all but the first match has
-      # empty values for the merged fields. Both files must be sorted in order of the
-      # common fields, sequenced by their occurence in the source header.
+      # Joins the source to the target and writes the output. The source fields used are
+      # given by the +fields+ argument, if given. By default, all source fields are used.
+      #
+      # The output fields consist of the qualified source fields and all target fields.
+      # The output fields are in the following order:
+      # 1. The common fields, in order of occurrence in the source file.
+      # 2. The qualified source-specific fields, in order of occurrence in the source file. 
+      # 3. The target-specific fields, in order of occurrence in the target file. 
+      #
+      # The match is on the common qualified source and target fields.
+      # Both files must be sorted in order of the common fields, sequenced by their
+      # occurence in the source header.
       #
       # If an output argument is given, then the joined record is written to the output.
       # If a block is given, then the block is called on each record prior to writing
       # the record to the output.
       #
+      # @param [<String>] fields the optional source fields to merge
+      #   (default is all source fields)
       # @yield [rec] process the output
       # @yieldparam [FasterCSV::Record] rec the output record
-      def join(&block)
+      def join(*fields, &block)
         CsvIO.open(@target) do |tgt|
           CsvIO.open(@source) do |src|
-            @common = src.accessors & tgt.accessors
-            hdrs = src.field_names | tgt.field_names
+            # all source fields (unordered)
+            usflds = src.field_names.to_set
+            fields.each do |fld|
+              unless usflds.include?(fld) then
+                raise ArgumentError.new("CSV join field #{fld} not found in the source file #{@sourc}.")
+              end
+            end
+            # the qualified source fields (ordered)
+            qsflds = fields.empty? ? src.field_names : fields
+            tflds = tgt.field_names
+            @common = qsflds & tflds
+            # The headers consist of the common fields followed by the qualified
+            # source-specific fields followed by the target-specific fields.
+            hdrs = @common | qsflds | tflds
             CsvIO.open(@output, :mode => 'w', :headers => hdrs) do |out|
               merge(src, tgt, out, &block)
             end
@@ -41,7 +65,10 @@ module Jinx
       private
     
       Buffer ||= Struct.new(:key, :record, :lookahead)
-
+      
+      # Merges the given source into the target as the output.
+      # The output headers must be in the order specified by {#join}.
+      #
       # @param [CsvIO] source the source CSV IO
       # @param [CsvIO] target the target CSV IO
       # @param [CsvIO] output the merged output CSV IO
@@ -49,10 +76,16 @@ module Jinx
       # @yieldparam (see #join)
       # @see #join
       def merge(source, target, output)
-        # The source-specific accessors
-        srest = source.accessors - @common
+        # the qualified source field accessors
+        sflds = source.accessors & output.accessors
+        # the target field accessors
+        tflds = target.accessors
+        # the common fields
+        @common = sflds & tflds
         # The target-specific accessors
-        trest = target.accessors - @common
+        trest = tflds - @common
+        # The source-specific accessors
+        srest = output.accessors - trest - @common
         # The output record
         orec = Array.new(output.accessors.size)
         # The source/target current/next (key, record) buffers
@@ -65,14 +98,14 @@ module Jinx
           orec.fill do |i|
             if i < @common.size then
               cmp <= 0 ? sbuf.key[i] : tbuf.key[i]
-            elsif i < source.accessors.size then
-              # Only fill the source values if there is a current source record and the
-              # target does not precede the source.
+            elsif i < sflds.size then
+              # Only fill the output record with source values if there is a current source
+              # record and the target does not precede the source.
               sbuf.record[srest[i - @common.size]] if sbuf and cmp <= 0
             elsif tbuf and cmp >= 0
-              # Only fill the target values if there is a current target record and the
-              # source does not precede the target.
-              tbuf.record[trest[i - source.accessors.size]]
+              # Only fill the output record with target values if there is a current target
+              # record and the source does not precede the target.
+              tbuf.record[trest[i - sflds.size]]
             end
           end
           yield orec if block_given?

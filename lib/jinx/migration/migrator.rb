@@ -192,7 +192,7 @@ module Jinx
         Jinx.fail(MigrationError, "Migrator missing required field mapping file parameter")
       end
       @def_files = opts[:defaults]
-      @filter_files = opts[:filters]
+      @flt_files = opts[:filters]
       shims_opt = opts[:shims] ||= []
       # Make a single shims file into an array.
       @shims = shims_opt.collection? ? shims_opt : [shims_opt]
@@ -242,7 +242,7 @@ module Jinx
       # create the class => path => default value hash
       @def_hash = @def_files ? load_defaults_files(@def_files) : {}
       # create the class => path => default value hash
-      @filter_hash = @filter_files ? load_filter_files(@filter_files) : {}
+      @flt_hash = @flt_files ? load_filter_files(@flt_files) : {}
       # the missing owner classes
       @owners = Set.new
       # create the class => path => header hash
@@ -385,32 +385,27 @@ module Jinx
     # on the input field value corresponding to the path.
     def migration_filters(klass)
       # the attribute => migration method hash
-      mth_hash = attribute_method_hash(klass)
-      @mgt_mths[klass] = mth_hash unless mth_hash.empty?
-      proc_hash = attribute_proc_hash(klass)
-      return if mth_hash.empty? and proc_hash.empty?
-      # for each class path terminal attribute metadata, add the migration filters
-      # to the attribute metadata => filter hash
+      mh = attribute_method_hash(klass)
+      @mgt_mths[klass] = mh unless mh.empty?
+      fh = attribute_filter_hash(klass)
+      return if mh.empty? and fh.empty?
+      # For each class path terminal attribute metadata, add the migration filters
+      # to the attribute metadata => proc hash.
       klass.attributes.to_compact_hash do |pa|
-        # the filter proc
-        proc = proc_hash[pa]
+        # the filter
+        flt = fh[pa]
         # the migration shim method
-        mth = mth_hash[pa]
-        if mth then
-          if proc then
-            Proc.new do |obj, value, row|
-              # filter the value
-              fval = proc.call(value)
-              # call the migration method on the filtered value
-              obj.send(mth, fval, row) unless fval.nil?
-            end
+        mth = mh[pa]
+        # the filter proc
+        Proc.new do |obj, value, row|
+          # filter the value
+          value = flt.transform(value) if flt and not value.nil?
+          # apply the migrate_<attribute> method, if defined
+          if mth then
+            obj.send(mth, value, row) unless value.nil?
           else
-            # call the migration method
-            Proc.new { |obj, value, row| obj.send(mth, value, row) }
+            value
           end
-        elsif proc then
-          # call the filter
-          Proc.new { |obj, value, row| proc.call(value) }
         end
       end
     end
@@ -419,7 +414,7 @@ module Jinx
       # the migrate methods, excluding the Migratable migrate_references method
       mths = klass.instance_methods(true).select { |mth| mth =~ /^migrate.(?!references)/ }
       # the attribute => migration method hash
-      mth_hash = {}
+      mh = {}
       mths.each do |mth|
         # the attribute suffix, e.g. name for migrate_name or Name for migrateName
         suffix = /^migrate(_)?(.*)/.match(mth).captures[1]
@@ -428,9 +423,9 @@ module Jinx
         # the attribute for the name, or skip if no such attribute
         pa = klass.standard_attribute(attr_nm) rescue next
         # associate the attribute => method
-        mth_hash[pa] = mth
+        mh[pa] = mth
       end
-      mth_hash
+      mh
     end
     
     # Builds the property => filter hash. The filter is specified in the +--filter+ migration
@@ -439,23 +434,24 @@ module Jinx
     #
     # @param [Class] klass the migration class
     # @return [Property => Proc] the filter migration methods
-    def attribute_proc_hash(klass)
-      hash = @filter_hash[klass]
-      proc_hash = {}
+    def attribute_filter_hash(klass)
+      hash = @flt_hash[klass]
+      fh = {}
       klass.each_property do |prop|
         pa = prop.attribute
         spec = hash[pa] if hash
         # If the property is boolean, then make a filter that operates on the parsed string input.
         if prop.type == Java::JavaLang::Boolean then
-          boolean_filter(spec)
+          fh[pa] = boolean_filter(spec)
+          logger.debug { "The migrator added the default text -> boolean filter for #{klass.qp} #{pa}." }
         elsif spec then
-          proc_hash[pa] = Migration::Filter.new(spec)
+          fh[pa] = Migration::Filter.new(spec)
         end
       end
-      unless proc_hash.empty? then
-        logger.debug { "The migration filters were loaded for #{klass.qp} #{proc_hash.keys.to_series}." }
+      unless fh.empty? then
+        logger.debug { "The migration filters were loaded for #{klass.qp} #{fh.keys.to_series}." }
       end
-      proc_hash
+      fh
     end
                     
     # @param [String, nil] the value filter, if any
@@ -463,15 +459,14 @@ module Jinx
     def boolean_filter(spec=nil)
       # break up the spec into two specs, one on strings and one on booleans
       bspec, sspec = spec.split { |k, v| Boolean === k } if spec
-      bf = Migration::Filter.new(bspec) unless bspec.empty?
-      sf = Migration::Filter.new(sspec) unless sspec.empty?
-      logger.debug { "The migrator added the default text -> boolean filter for #{klass.qp} #{pa}." }
+      bf = Migration::Filter.new(bspec) if bspec and not bspec.empty?
+      sf = Migration::Filter.new(sspec) if sspec and not sspec.empty?
       # make the composite filter 
       Migration::Filter.new do |value|
-        fv = sf.filter(value) if sf
+        fv = sf.transform(value) if sf
         if fv.nil? then
           bv = Jinx::Boolean.for(value) rescue nil
-          fv = bf.nil? || bv.nil? ? bv : bf.filter(bv)
+          fv = bf.nil? || bv.nil? ? bv : bf.transform(bv)
         end
         fv
       end 
@@ -803,7 +798,7 @@ module Jinx
     def filter_value(obj, property, value, row)
       flt = filter_for(obj, property.to_sym)
       return value if flt.nil?
-      fval = flt.filter(obj, value, row)
+      fval = flt.call(obj, value, row)
       unless value == fval then
         logger.debug { "The migration filter transformed the #{obj.qp} #{property} value from #{value.qp} to #{fval}." }
       end
