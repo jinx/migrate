@@ -213,7 +213,7 @@ module Jinx
       @create = opts[:create]
       logger.info("Migration options: #{printable_options(opts).pp_s}.")
       # flag indicating whether to print a progress monitor
-      @print_progress = opts[:verbose]
+      @verbose = opts[:verbose]
     end
     
     def printable_options(opts)
@@ -496,6 +496,7 @@ module Jinx
       
       @rec_cnt = mgt_cnt = 0
       logger.info { "Migrating #{@input}..." }
+      puts "Migrating #{@input}..." if @verbose
       @reader.each do |row|
         # the one-based current record number
         rec_no = @rec_cnt + 1
@@ -532,8 +533,8 @@ module Jinx
           logger.info { "Migrated record #{rec_no}." }
           #memory_usage = `ps -o rss= -p #{Process.pid}`.to_f / 1024 # in megabytes
           #logger.debug { "Migrated rec #{@rec_cnt}; memory usage: #{sprintf("%.1f", memory_usage)} MB." }
-          if @print_progress then print_progress(mgt_cnt) end
           mgt_cnt += 1
+          if @verbose then print_progress(mgt_cnt) end
           # clear the migration state
           clear(tgt)
         elsif @rejects then
@@ -549,7 +550,7 @@ module Jinx
         @rec_cnt += 1
       end
       logger.info("Migrated #{mgt_cnt} of #{@rec_cnt} records.")
-      if @print_progress then
+      if @verbose then
         puts
         puts "Migrated #{mgt_cnt} of #{@rec_cnt} records."
       end

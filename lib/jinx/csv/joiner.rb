@@ -30,11 +30,12 @@ module Jinx
       #
       # If an output argument is given, then the joined record is written to the output.
       # If a block is given, then the block is called on each record prior to writing
-      # the record to the output.
+      # the record to the output. If the block returns nil, then the record is not
+      # written.
       #
       # @param [<String>] fields the optional source fields to merge
       #   (default is all source fields)
-      # @yield [rec] process the output
+      # @yield [rec] process the output record and return the record to write
       # @yieldparam [FasterCSV::Record] rec the output record
       def join(*fields, &block)
         CsvIO.open(@target) do |tgt|
@@ -43,7 +44,7 @@ module Jinx
             usflds = src.field_names.to_set
             fields.each do |fld|
               unless usflds.include?(fld) then
-                raise ArgumentError.new("CSV join field #{fld} not found in the source file #{@sourc}.")
+                raise ArgumentError.new("CSV join field #{fld} not found in the source file #{@source}.")
               end
             end
             # the qualified source fields (ordered)
@@ -87,7 +88,7 @@ module Jinx
         # The source-specific accessors
         srest = output.accessors - trest - @common
         # The output record
-        orec = Array.new(output.accessors.size)
+        obuf = Array.new(output.accessors.size)
         # The source/target current/next (key, record) buffers
         # Read the first and second records into the buffers
         sbuf = shift(source)
@@ -95,7 +96,7 @@ module Jinx
         # Compare the source and target.
         while cmp = compare(sbuf, tbuf) do
           # Fill the output record in three sections: the common, source and target fields.
-          orec.fill do |i|
+          obuf.fill do |i|
             if i < @common.size then
               cmp <= 0 ? sbuf.key[i] : tbuf.key[i]
             elsif i < sflds.size then
@@ -108,9 +109,9 @@ module Jinx
               tbuf.record[trest[i - sflds.size]]
             end
           end
-          yield orec if block_given?
+          orec = block_given? ? yield(obuf) : obuf 
           # Emit the output record.
-          output << orec
+          output << orec if orec
           # Shift the buffers as necessary.
           ss, ts = shift?(sbuf, tbuf, cmp), shift?(tbuf, sbuf, -cmp)
           sbuf = shift(source, sbuf) if ss

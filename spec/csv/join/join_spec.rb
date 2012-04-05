@@ -48,6 +48,7 @@ describe 'Join' do
         else 
           @prev = curr
         end
+        rec unless curr == ['a2', 'b3']
       end
     end
 
@@ -60,6 +61,10 @@ describe 'Join' do
       @output[2].should == ['a1', nil, 'v', 'x']
       @output[3].should == ['a1', 'b2', 'u', 'x']
       @output[4].should == ['a1', nil, 'u', 'y']
+    end
+
+    it 'omits the record if the block returns nil' do
+      @output[5].should == ['a2', 'b4', 'u']
     end
   end
   
