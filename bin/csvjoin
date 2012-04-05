@@ -12,13 +12,13 @@ require 'jinx/csv/csvio'
 require 'jinx/cli/command'
 
 specs = [
-  [:source, 'SOURCE', 'The source input file'],
-  [:target, '[TARGET]', 'The target input file (default stdin)'],
-  [:output, '-o' '--output FILE', 'The joined output file (default stdout)']
+  [:to, '--to TARGET', 'The join target input file (default stdin)'],
+  [:as, '--as OUTPUT', 'The joined output file (default stdout)'],
+  [:source, 'SOURCE', 'The join source input file']
 ]
 
 Jinx::CLI::Command.new(specs).start do |opts|
-  Jinx::CsvIO.join(opts[:source], opts[:target], opts[:output])
+  Jinx::CsvIO.join(opts.delete(:source), opts)
 end
 
 exit 0
