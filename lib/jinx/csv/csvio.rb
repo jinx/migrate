@@ -61,12 +61,13 @@ module Jinx
     # @param [String, IO] source the join source file
     # @param [{Symbol => String, IO, <String>}] opts the join options
     # @option opts [String, IO] :to the join target file name or device (default stdin)
-    # @option opts [String, IO] :for the target field names (default all target fields)
+    # @option opts [<String>] :for the target field names (default all target fields)
     # @option opts [String, IO] :as the output file name or device (default stdout)
     # @yield (see Csv::Joiner#join)
     # @yieldparam (see Csv::Joiner#join)
     def self.join(source, opts, &block)
-      Csv::Joiner.new(source, opts[:to], opts[:as]).join(*opts[:for], &block)
+      flds = opts[:for] || Array::EMPTY_ARRAY
+      Csv::Joiner.new(source, opts[:to], opts[:as]).join(*flds, &block)
     end
     
     # Creates a new CsvIO for the specified source file.
