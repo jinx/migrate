@@ -14,8 +14,8 @@ module Jinx
   #    result of calling that method, otherwise the attribute is set to the original
   #    input value.
   #
-  #    For example, if the +Name+ input field maps to +Participant.name+, then a
-  #    custom +Participant+ +migrate_name+ shim method can be defined to reformat
+  #    For example, if the +Name+ input field maps to +Parent.name+, then a
+  #    custom +Parent+ +migrate_name+ shim method can be defined to reformat
   #    the input name.
   #
   # 4. The Resource attribute is set to the (possibly modified) value.
@@ -25,15 +25,15 @@ module Jinx
   #    by default, but a migration shim can add a validation check,
   #    migrated Resource class to return false for special cases.
   #
-  #    For example, a custom +Participant+ +migration_valid?+ shim method can be
+  #    For example, a custom +Parent+ +migration_valid?+ shim method can be
   #    defined to return whether there is a non-empty input field value.
   #
   # 6. After the migrated objects are validated, then the Migrator fills in
-  #    dependency hierarchy gaps. For example, if the Resource class +Participant+
-  #    owns the +enrollments+ dependent which in turn owns the +encounters+ dependent
-  #    and the migration has created a +Participant+ and an +Encounter+ but no +Enrollment+,
-  #    then an empty +Enrollment+ is created which is owned by the migrated +Participant+
-  #    and owns the migrated +Encounter+.
+  #    dependency hierarchy gaps. For example, if the Resource class +Parent+
+  #    owns the +household+ dependent which in turn owns the +address+ dependent
+  #    and the migration has created a +Parent+ and an +Address+ but no +Household+,
+  #    then an empty +Household+ is created which is owned by the migrated +Parent+
+  #    and owns the migrated +Address+.
   #
   # 7. After all dependencies are filled in, then the independent references are set
   #    for each created Resource (including the new dependents). If a created
@@ -41,9 +41,9 @@ module Jinx
   #    and there is a migrated instance of that attribute type, then the attribute
   #    is set to that migrated instance.
   #
-  #    For example, if +Enrollment+ has a +study+ attribute and there is a
-  #    single migrated +Study+ instance, then the +study+ attribute is set
-  #    to that migrated +Study+ instance.
+  #    For example, if +Household+ has a +address+ attribute and there is a
+  #    single migrated +Address+ instance, then the +address+ attribute is set
+  #    to that migrated +Address+ instance.
   #
   #    If the referencing class implements a method +migrate_+_attribute_ for the
   #    migration _attribute_, then that migrate method is called with the referenced
@@ -51,9 +51,9 @@ module Jinx
   #    attribute is set to the original referenced instance.
   #
   #    There must be a single unambiguous candidate independent instance, e.g. in the
-  #    unlikely but conceivable case that two +Study+ instances are migrated, then the
-  #    +study+ attribute is not set. Similarly, collection attributes are not set,
-  #    e.g. a +Study+ +protocols+ attribute is not set to a migrated +Protocol+
+  #    unlikely but conceivable case that two +Address+ instances are migrated, then the
+  #    +address+ attribute is not set. Similarly, collection attributes are not set,
+  #    e.g. a +Address+ +protocols+ attribute is not set to a migrated +Protocol+
   #    instance.
   #
   # 8. The {#migrate} method is called to complete the migration. As described in the
@@ -61,12 +61,11 @@ module Jinx
   #    method for custom migration processing, e.g. to migrate the ambiguous or
   #    collection attributes mentioned above, or to fill in missing values.
   #
-  #    Note that there is an extensive set of attribute defaults defined in
-  #    the Metadata application domain classes. These defaults
-  #    are applied in a migration database save action and need not be set in
-  #    a migration shim. For example, if an acceptable default for a +Study+
-  #    +active?+ flag is defined in the +Study+ meta-data, then the flag does not
-  #    need to be set in a migration shim.
+  #    Note that there is an extensive set of attribute defaults defined in the +Jinx::Resource+
+  #    application domain classes. These defaults are applied in a migration database save
+  #    action and need not be set in a migration shim. For example, if an acceptable
+  #    default for an +Address.country+ property is defined in the +Address+ meta-data,
+  #    then the country does not need to be set in a migration shim.
   module Migratable
     # Completes setting this Migratable domain object's attributes from the given input row.
     # This method is responsible for migrating attributes which are not mapped
