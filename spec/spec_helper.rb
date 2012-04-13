@@ -2,7 +2,6 @@ require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:test, :development)
 
-require 'rack'
 require 'jinx/migration/migrator'
 
 # Open the logger.

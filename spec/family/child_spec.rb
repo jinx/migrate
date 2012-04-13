@@ -6,8 +6,9 @@ module Family
       # Migrate the input.
       @migrated = Jinx::Migrator.new(
         :debug => true,
-        :target => Family::Child,
+        :target => Child,
         :mapping => CONFIGS + '/children/fields.yaml',
+        :shims => SHIMS,
         :input => DATA + '/children.csv'
       ).to_a
     end

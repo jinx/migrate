@@ -2,6 +2,6 @@
 require Bundler.environment.specs.detect { |s| s.name == 'jinx' }.full_gem_path + '/spec/support/model'
 
 # Make the test domain classes migratable
-module Domain
+module Model
   include Jinx::Migratable
 end

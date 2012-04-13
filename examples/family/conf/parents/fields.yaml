@@ -1,6 +1,6 @@
 Name: Parent.name
-Street: Address.street1
-City: Address.city
-Zip: Address.postal_code
+Street: Household.address.street1
+City: Household.address.city
+Zip: Household.address.postal_code
 Spouse: Parent.spouse.name
 

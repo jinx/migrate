@@ -1,4 +1,4 @@
-module Domain
+module Model
   shims Parent
   
   class Parent

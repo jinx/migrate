@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-module Domain  
+module Model  
   describe 'Skip' do
     before(:all) do
       @migrated = Jinx::Migrator.new(:debug => true, :target => Parent,

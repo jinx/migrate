@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-module Domain
+module Model
   describe 'Primitive' do
     before(:all) do
       # Migrate the input.

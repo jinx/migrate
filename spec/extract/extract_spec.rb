@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-module Domain
+module Model
   describe 'Extract' do
     EXTRACT = File.expand_path('ids.csv', Migration::Test::RESULTS + '/extract')
     
