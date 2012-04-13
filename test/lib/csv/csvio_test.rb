@@ -1,4 +1,11 @@
-require File.dirname(__FILE__) + '/../../helper'
+require 'rubygems'
+require 'bundler/setup'
+Bundler.require(:test, :development)
+
+require 'jinx/migration/migrator'
+
+# Open the logger.
+Jinx::Log.instance.open(File.dirname(__FILE__) + '/../../results/log/jinx.log', :debug => true)
 
 require 'test/unit'
 require 'ftools'

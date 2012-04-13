@@ -1,4 +1,6 @@
-module Domain
+require 'jinx/resource/unique'
+
+module Model
   shims Parent
   
   class Parent

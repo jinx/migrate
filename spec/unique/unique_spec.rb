@@ -1,9 +1,9 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-module Domain
+module Model
   describe 'Unique' do
     # Add the parent metadata definition.
-    Domain.definitions File.dirname(__FILE__)
+    Model.definitions File.dirname(__FILE__)
     
     # Migrate the input.
     migrated = Jinx::Migrator.new(:debug => true, :target => Parent, :unique => true,

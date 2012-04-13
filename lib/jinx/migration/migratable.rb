@@ -1,5 +1,5 @@
 module Jinx
-  # A Migratable mix-in adds migration support for Resource domain objects.
+  # The Migratable mix-in adds migration support for Resource domain objects.
   # For each migration Resource created by a Migrator, the migration process
   # is as follows:
   #
@@ -115,8 +115,17 @@ module Jinx
       # migrate the owner
       migratable__migrate_owner(row, migrated, target, proc_hash)
       # migrate the remaining attributes
-      migratable__set_nonowner_references(self.class.saved_independent_attributes, row, migrated, proc_hash)
+      migratable__set_nonowner_references(migratable_independent_attributes, row, migrated, proc_hash)
       migratable__set_nonowner_references(self.class.unidirectional_dependent_attributes, row, migrated, proc_hash)
+    end
+                 
+    # Returns this Resource's class {Propertied#independent_attributes}.
+    # Applications can override this implement to restrict the independent attributes which
+    # are migrated, e.g. to include only saved independent attributes. 
+    #
+    # @return the attributes to migrate
+    def migratable_independent_attributes
+      self.class.independent_attributes
     end
     
     # Extracts the content of this migration target to the given file.

@@ -8,11 +8,11 @@ module Family
       @migrated = Jinx::Migrator.new(
         :debug => true,
         :target => Parent,
-        :mapping => File.expand_path('fields.yaml', File.dirname(__FILE__)),
-        :defaults => File.expand_path('defaults.yaml', File.dirname(__FILE__)),
-        :filters => File.expand_path('values.yaml', File.dirname(__FILE__)),
-        :shims => File.expand_path('family.rb', File.dirname(__FILE__)),
-        :input => File.expand_path('parents.csv', File.dirname(__FILE__))
+        :mapping => CONFIGS + '/parents/fields.yaml',
+        :defaults => CONFIGS + '/parents/defaults.yaml',
+        :filters => CONFIGS + '/parents/values.yaml',
+        :shims => SHIMS,
+        :input => DATA + '/parents.csv'
       ).to_a
     end
     
