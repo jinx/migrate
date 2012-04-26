@@ -973,7 +973,7 @@ module Jinx
       names = path_s.split('.')
       # If the path starts with a capitalized class name, then resolve the class.
       # Otherwise, the target class is the start of the path.
-      klass = names.first =~ /^[A-Z]/ ? context_module.module_for_name(names.shift) : @target_class
+      klass = names.first =~ /^[A-Z]/ ? class_for_name(names.shift) : @target_class
       # There must be at least one attribute.
       if names.empty? then
         Jinx.fail(MigrationError, "Property entry in migration configuration is not in <class>.<attribute> format: #{path_s}")
@@ -986,10 +986,10 @@ module Jinx
         prop = begin
           parent.property(pa)
         rescue NameError => e
-          Jinx.fail(MigrationError, "Migration field mapping attribute #{parent.qp}.#{pa} not found", e)
+          Jinx.fail(MigrationError, "Migration field mapping attribute #{parent}.#{pa} not found", e)
         end
         if prop.collection? then
-          Jinx.fail(MigrationError, "Migration field mapping attribute #{parent.qp}.#{prop} is a collection, which is not supported")
+          Jinx.fail(MigrationError, "Migration field mapping attribute #{parent}.#{prop} is a collection, which is not supported")
         end
         path << prop
         prop.type
@@ -1007,6 +1007,13 @@ module Jinx
     # @return [Module] the class name resolution context
     def context_module
       @target_class.domain_module
+    end
+    
+    # @param [String] the class name to resolve in the context of this migrator
+    # @return [Class] the corresponding class
+    # @raise [NameError] if the name cannot be resolved
+    def class_for_name(name)
+      context_module.module_for_name(name)
     end
 
     # @return a new class => [paths] hash from the migration fields configuration map
