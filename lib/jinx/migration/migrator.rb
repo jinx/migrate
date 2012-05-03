@@ -50,8 +50,8 @@ module Jinx
     # domain object. If no block is given, then this method returns an array of the
     # migrated target objects.
     #
-    # @yield [target, row] operation performed on the migration target
-    # @yieldparam [Jinx::Resource] target the migrated target domain object
+    # @yield [target, row] operates on the migration target
+    # @yieldparam [Resource] target the migrated target domain object
     # @yieldparam [{Symbol => Object}] row the migration source record
     def migrate(&block)
       unless block_given? then
@@ -536,7 +536,7 @@ module Jinx
       # create an instance for each creatable class
       created = Set.new
       # the migrated objects
-      migrated = @creatable_classes.map { |klass| create(klass, row, created) }
+      migrated = @creatable_classes.map { |klass| create_instance(klass, row, created) }
       # migrate each object from the input row
       migrated.each do |obj|
         # First uniquify the object if necessary.
@@ -634,7 +634,7 @@ module Jinx
     # @param [{Symbol => Object}] row the input row
     # @param [<Resource>] created the migrated instances for this row
     # @return [Resource] the new instance
-    def create(klass, row, created)
+    def create_instance(klass, row, created)
       # the new object
       logger.debug { "The migrator is building #{klass.qp}..." }
       created << obj = klass.new
