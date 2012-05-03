@@ -110,7 +110,7 @@ module Jinx
       when Enumerable then
         ''.parse_csv(:headers => hdr_opt, :header_converters => :symbol, :return_headers => true)
       else
-        Jinx.fail(ArgumentError, "CSV headers option value not supported: #{hdr_opt}")
+        raise ArgumentError.new("CSV headers option value not supported: #{hdr_opt}")
       end
       # The field value accessors consist of the header row headers converted to a symbol.
       @accessors = hdr_row.headers
