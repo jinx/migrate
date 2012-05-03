@@ -133,7 +133,7 @@ module Jinx
     def parse_options(opts)
       @fld_map_files = opts[:mapping]
       if @fld_map_files.nil? then
-        Jinx.fail(MigrationError, "Migrator missing required field mapping file parameter")
+        raise MigrationError.new("Migrator missing required field mapping file parameter")
       end
       @def_files = opts[:defaults]
       @flt_files = opts[:filters]
@@ -144,11 +144,11 @@ module Jinx
       @from = opts[:from] ||= 1
       @input = opts[:input]
       if @input.nil? then
-        Jinx.fail(MigrationError, "Migrator missing required source file parameter")
+        raise MigrationError.new("Migrator missing required source file parameter")
       end
       @target_class = opts[:target]
       if @target_class.nil? then
-        Jinx.fail(MigrationError, "Migrator missing required target class parameter")
+        raise MigrationError.new("Migrator missing required target class parameter")
       end
       @bad_file = opts[:bad]
       @extract = opts[:extract]
@@ -168,7 +168,7 @@ module Jinx
 
     def build
       # the current source class => instance map
-      Jinx.fail(MigrationError, "No file to migrate") if @input.nil?
+      raise MigrationError.new("No file to migrate") if @input.nil?
 
       # If the input is a file name, then make a CSV loader which only converts input fields
       # corresponding to non-String attributes.
@@ -201,7 +201,7 @@ module Jinx
       # An abstract class cannot be instantiated.
       @creatable_classes.each do |klass|
         if klass.abstract? then
-          Jinx.fail(MigrationError, "Migrator cannot create the abstract class #{klass}; specify a subclass instead in the mapping file.")
+          raise MigrationError.new("Migrator cannot create the abstract class #{klass}; specify a subclass instead in the mapping file.")
         end
       end
       
@@ -487,7 +487,7 @@ module Jinx
           @rejects.flush
           logger.debug("Invalid record #{rec_no} was written to the rejects file #{@bad_file}.")
         else
-          Jinx.fail(MigrationError, "Migration not performed on record #{rec_no}")
+          raise MigrationError.new("Migration not performed on record #{rec_no}")
         end
         # Bump the record count.
         @rec_cnt += 1
@@ -701,7 +701,7 @@ module Jinx
     # @return the new object
     def create_reference(obj, property, row, created)
       if property.type.abstract? then
-        Jinx.fail(MigrationError, "Cannot create #{obj.qp} #{property} with abstract type #{property.type}")
+        raise MigrationError.new("Cannot create #{obj.qp} #{property} with abstract type #{property.type}")
       end
       ref = property.type.new
       ref.migrate(row, Array::EMPTY_ARRAY)
@@ -821,7 +821,7 @@ module Jinx
         # the header accessor method for the field
         header = @reader.accessor(field)
         if header.nil? then
-          Jinx.fail(MigrationError, "Field defined in migration configuration not found in input file #{@input} headers: #{field}")
+          raise MigrationError.new("Field defined in migration configuration not found in input file #{@input} headers: #{field}")
         end
         # associate each attribute path in the property value with the header
         attr_list.split(/,\s*/).each do |path_s|
@@ -887,7 +887,7 @@ module Jinx
         next if flt.nil_or_empty?
         klass, path = create_attribute_path(path_s)
         unless path.size == 1 then
-          Jinx.fail(MigrationError, "Migration filter configuration path not supported: #{path_s}")
+          raise MigrationError.new("Migration filter configuration path not supported: #{path_s}")
         end
         pa = klass.standard_attribute(path.first.to_sym)
         flt_hash = hash[klass] ||= {}
@@ -905,7 +905,7 @@ module Jinx
       klass = names.first =~ /^[A-Z]/ ? class_for_name(names.shift) : @target_class
       # There must be at least one attribute.
       if names.empty? then
-        Jinx.fail(MigrationError, "Property entry in migration configuration is not in <class>.<attribute> format: #{path_s}")
+        raise MigrationError.new("Property entry in migration configuration is not in <class>.<attribute> format: #{path_s}")
       end
       
       # Build the attribute path.
@@ -918,7 +918,7 @@ module Jinx
           Jinx.fail(MigrationError, "Migration field mapping attribute #{parent}.#{pa} not found", e)
         end
         if prop.collection? then
-          Jinx.fail(MigrationError, "Migration field mapping attribute #{parent}.#{prop} is a collection, which is not supported")
+          raise MigrationError.new("Migration field mapping attribute #{parent}.#{prop} is a collection, which is not supported")
         end
         path << prop
         prop.type

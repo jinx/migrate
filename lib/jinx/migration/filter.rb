@@ -139,7 +139,7 @@ module Jinx
           reopt = if opt then
             case opt
               when 'i' then Regexp::IGNORECASE
-              else Jinx.fail(MigrationError, "Migration value filter regular expression #{k} qualifier not supported: expected 'i', found '#{opt}'")
+              else raise MigrationError.new("Migration value filter regular expression #{k} qualifier not supported: expected 'i', found '#{opt}'")
             end
           end
           # the Regexp object
