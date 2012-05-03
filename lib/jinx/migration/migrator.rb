@@ -728,8 +728,8 @@ module Jinx
       # set the attribute
       begin
         obj.send(property.writer, value)
-      rescue Exception => e
-        Jinx.fail(MigrationError, "Could not set #{obj.qp} #{property} to #{value.qp}", e)
+      rescue Exception
+        raise MigrationError.new("Could not set #{obj.qp} #{property} to #{value.qp} - " + $!)
       end
       logger.debug { "Migrated #{obj.qp} #{property} to #{value}." }
     end
@@ -807,7 +807,7 @@ module Jinx
       begin
         config = YAML.load_file(file)
       rescue
-        Jinx.fail(MigrationError, "Could not read field map file #{file}: " + $!)
+        raise MigrationError.new("Could not read field map file #{file}: " + $!)
       end
       populate_field_map(config, hash)
     end
@@ -850,7 +850,7 @@ module Jinx
       begin
         config = YAML::load_file(file)
       rescue
-        Jinx.fail(MigrationError, "Could not read defaults file #{file}: " + $!)
+        raise MigrationError.new("Could not read defaults file #{file}: " + $!)
       end
       # collect the class => path => value entries
       config.each do |path_s, value|
@@ -881,7 +881,7 @@ module Jinx
       begin
         config = YAML::load_file(file)
       rescue
-        Jinx.fail(MigrationError, "Could not read filter file #{file}: " + $!)
+        raise MigrationError.new("Could not read filter file #{file}: " + $!)
       end
       config.each do |path_s, flt|
         next if flt.nil_or_empty?
@@ -914,8 +914,8 @@ module Jinx
         pa = name.to_sym
         prop = begin
           parent.property(pa)
-        rescue NameError => e
-          Jinx.fail(MigrationError, "Migration field mapping attribute #{parent}.#{pa} not found", e)
+        rescue NameError
+          raise MigrationError.new("Migration field mapping attribute #{parent}.#{pa} not found - " + $!)
         end
         if prop.collection? then
           raise MigrationError.new("Migration field mapping attribute #{parent}.#{prop} is a collection, which is not supported")
