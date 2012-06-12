@@ -886,8 +886,10 @@ module Jinx
       config.each do |path_s, flt|
         next if flt.nil_or_empty?
         klass, path = create_attribute_path(path_s)
-        unless path.size == 1 then
-          raise MigrationError.new("Migration filter configuration path not supported: #{path_s}")
+        if path.empty? then
+          raise MigrationError.new("Migration filter configuration path does not include a property: #{path_s}")
+        elsif path.size > 1 then
+          raise MigrationError.new("Migration filter configuration path with more than one property is not supported: #{path_s}")
         end
         pa = klass.standard_attribute(path.first.to_sym)
         flt_hash = hash[klass] ||= {}
